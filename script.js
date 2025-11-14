@@ -30,10 +30,10 @@ async function processDocx() {
         // Criar DOCX com docx.js
         const doc = new docx.Document();
 
-        // Converter cada parágrafo HTML para parágrafo docx
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = translatedHTML;
 
+        // Cada parágrafo HTML → Paragraph docx
         tempDiv.querySelectorAll("p").forEach(p => {
             const paragraph = new docx.Paragraph({
                 children: Array.from(p.childNodes).map(node => {
@@ -60,7 +60,6 @@ async function processDocx() {
     }
 }
 
-// Função que envia para a API com suas regras literais
 async function callLLM(apiKey, originalHTML) {
     const rules = `
 INSTRUÇÕES PARA TRADUÇÃO LITERÁRIA:
@@ -101,6 +100,5 @@ INSTRUÇÕES PARA TRADUÇÃO LITERÁRIA:
         (data.choices?.[0]?.message?.content) ||
         "";
 
-    // Remove eventuais ```html
     return translated.replace(/^```(?:html)?\s*/i, "").replace(/\s*```$/i, "");
 }
