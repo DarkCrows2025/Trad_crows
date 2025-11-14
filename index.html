@@ -6,6 +6,8 @@
 
     <!-- Bibliotecas via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.3/docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
         body {
@@ -14,7 +16,7 @@
             margin: auto;
             padding: 20px;
         }
-        input, textarea, button {
+        input, button {
             width: 100%;
             margin-top: 10px;
             padding: 10px;
@@ -42,33 +44,6 @@
 <h3>Resultado</h3>
 <div id="output">O texto traduzido aparecerá aqui…</div>
 
-<script>
-async function processDocx() {
-    const fileInput = document.getElementById("docxInput");
-    const output = document.getElementById("output");
-    const apiKey = document.getElementById("apiKey").value;
-
-    if (!apiKey) {
-        alert("Cole a chave da API da OpenAI!");
-        return;
-    }
-
-    if (!fileInput.files.length) {
-        alert("Selecione um arquivo DOCX!");
-        return;
-    }
-
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-
-    reader.onload = async function(event) {
-        const arrayBuffer = event.target.result;
-
-        try {
-            // Extrair texto do DOCX usando Mammoth
-            const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
-            const textoExtraido = result.value;
-
-            output.textContent = "Traduzindo…";
-
-            // Chamar função de tra
+<script src="script.js"></script>
+</body>
+</html>
