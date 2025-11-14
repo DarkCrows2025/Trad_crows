@@ -2,14 +2,11 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Tradutor DOCX com LLM</title>
+    <title>Tradutor DOCX Literário</title>
 
-    <!-- Bibliotecas via CDN (não precisa baixar nada) -->
-    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
-    <script src="https://unpkg.com/docx@8.3.3/build/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/turndown@7.1.2/dist/turndown.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
-
+    <!-- Bibliotecas via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,7 +14,7 @@
             margin: auto;
             padding: 20px;
         }
-        textarea, input, button {
+        input, textarea, button {
             width: 100%;
             margin-top: 10px;
             padding: 10px;
@@ -32,7 +29,7 @@
 </head>
 <body>
 
-<h2>Tradutor DOCX com GPT-5 Mini</h2>
+<h2>Tradutor DOCX Literário (GPT-5 Mini)</h2>
 
 <label>Chave da API da OpenAI:</label>
 <input id="apiKey" type="password" placeholder="Cole sua chave aqui">
@@ -46,6 +43,6 @@
 <div id="output">O texto traduzido aparecerá aqui…</div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
-
