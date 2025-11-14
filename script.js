@@ -12,7 +12,7 @@ async function processDocx() {
         return;
     }
 
-    outputDiv.innerHTML = "Lendo arquivo DOCX…";
+    outputDiv.textContent = "Lendo arquivo DOCX…";
 
     try {
         // Ler o DOCX com Mammoth.js
@@ -20,85 +20,76 @@ async function processDocx() {
         const result = await mammoth.convertToHtml({ arrayBuffer });
         const originalHTML = result.value;
 
-        outputDiv.innerHTML = "Enviando para GPT-5 Mini…";
+        outputDiv.textContent = "Enviando para GPT-5 Mini…";
 
-        // Chamar a LLM
-        const translatedHTML = await callLLM(apiKey, originalHTML);
+        // Traduzir mantendo estilo literário e regras
+        const translatedHTML = await traduzirComRegras(apiKey, originalHTML);
 
-        outputDiv.innerHTML = "Gerando DOCX traduzido…";
+        outputDiv.textContent = "Gerando DOCX traduzido…";
 
         // Criar DOCX com docx.js
-        const doc = new docx.Document();
+        const { Document, Paragraph, TextRun, Packer } = docx;
+        const doc = new Document();
 
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = translatedHTML;
 
-        // Cada parágrafo HTML → Paragraph docx
         tempDiv.querySelectorAll("p").forEach(p => {
-            const paragraph = new docx.Paragraph({
+            const paragraph = new Paragraph({
                 children: Array.from(p.childNodes).map(node => {
                     if (node.nodeName === "STRONG" || node.nodeName === "B") {
-                        return new docx.TextRun({ text: node.textContent, bold: true });
+                        return new TextRun({ text: node.textContent, bold: true });
                     } else if (node.nodeName === "EM" || node.nodeName === "I") {
-                        return new docx.TextRun({ text: node.textContent, italics: true });
+                        return new TextRun({ text: node.textContent, italics: true });
                     } else {
-                        return new docx.TextRun({ text: node.textContent });
+                        return new TextRun({ text: node.textContent });
                     }
                 })
             });
             doc.addSection({ children: [paragraph] });
         });
 
-        const blob = await docx.Packer.toBlob(doc);
-        saveAs(blob, "traduzido.docx");
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, "Documento_Traduzido.docx");
 
-        outputDiv.innerHTML = "Pronto! Arquivo DOCX traduzido baixado.";
-
+        outputDiv.textContent = "Tradução concluída! DOCX gerado.";
     } catch (err) {
-        console.error(err);
-        alert("Erro ao processar o documento. Veja o console.");
+        outputDiv.textContent = "Erro: " + err;
     }
 }
 
-async function callLLM(apiKey, originalHTML) {
-    const rules = `
-INSTRUÇÕES PARA TRADUÇÃO LITERÁRIA:
+async function traduzirComRegras(apiKey, htmlText) {
+    const prompt = `
+Você é um tradutor literário profissional. Traduza o seguinte texto do inglês para português brasileiro seguindo **todas estas regras**:
 
-1 — Traduzir textos do inglês fielmente para o português brasileiro fluidamente, com melhor entendimento. Pode alterar palavras ou frases para dar mais sentido, mas sem alterar o sentido ORIGINAL. Converter unidades para o formato brasileiro.
-2 — Manter palavrões e cenas explícitas.
-3 — Em capítulos, colocar os números em extenso (Ex.: Capítulo 1 → Capítulo Um).
-4 — Não deixar palavras em inglês, exceto nomes próprios, cidades, estados, etc.
-5 — Manter tempo e modo verbal do texto como no original.
-6 — Não usar gírias brasileiras nem tornar o texto abrasileirado. Manter gramática correta.
-7 — Revisar o texto minuciosamente para garantir precisão e consistência.
-8 — Adaptar "sift", "glamoured" e "apparate" para português, mantendo sentido e tom fantástico.
-9 — Adaptar outros termos de fantasia de forma criativa, fluida e mantendo imersão.
-10 — Manter itálicos e formatação original para Word.
-11 — Nunca substituir aspas por travessões.
-12 — Retorne apenas o HTML traduzido, sem explicações ou tags extras.
+1. Tradução fiel ao texto original; preserve o sentido literal.
+2. Mantenha o estilo literário.
+3. Preserve palavrões e cenas explícitas exatamente como no original.
+4. Não use gírias; mantenha linguagem formal adequada.
+5. Mantenha os tempos verbais e modos originais (passado, presente, futuro).
+6. Preserve negritos e itálicos do DOCX original (representados por <strong>/<b> ou <em>/<i> no HTML).
+7. Mantenha parágrafos, títulos e estrutura básica do texto.
+
+Texto a ser traduzido (HTML preservando formatação):
+${htmlText}
 `;
 
-    const payload = {
-        model: "gpt-5-mini",
-        input: rules + "\n\n---CONTEÚDO_HTML---\n\n" + originalHTML
-    };
-
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
-            "Authorization": "Bearer " + apiKey,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+            model: "gpt-5-mini",
+            messages: [{ role: "user", content: prompt }]
+        })
     });
 
     const data = await response.json();
-
-    const translated =
-        (data.output_text && String(data.output_text).trim()) ||
-        (Array.isArray(data.output) && data.output[0]?.content?.[0]?.text) ||
-        (data.choices?.[0]?.message?.content) ||
-        "";
-
-    return translated.replace(/^```(?:html)?\s*/i, "").replace(/\s*```$/i, "");
+    if (data.choices && data.choices.length > 0) {
+        return data.choices[0].message.content;
+    } else {
+        throw new Error("Nenhuma resposta da API");
+    }
 }
