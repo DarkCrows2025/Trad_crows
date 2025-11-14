@@ -25,7 +25,34 @@ async function processDocx() {
         // Chamar a LLM
         const translatedHTML = await callLLM(apiKey, originalHTML);
 
-        outputDiv.innerHTML = translatedHTML;
+        outputDiv.innerHTML = "Gerando DOCX traduzido…";
+
+        // Criar DOCX com docx.js
+        const doc = new docx.Document();
+
+        // Converter cada parágrafo HTML para parágrafo docx
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = translatedHTML;
+
+        tempDiv.querySelectorAll("p").forEach(p => {
+            const paragraph = new docx.Paragraph({
+                children: Array.from(p.childNodes).map(node => {
+                    if (node.nodeName === "STRONG" || node.nodeName === "B") {
+                        return new docx.TextRun({ text: node.textContent, bold: true });
+                    } else if (node.nodeName === "EM" || node.nodeName === "I") {
+                        return new docx.TextRun({ text: node.textContent, italics: true });
+                    } else {
+                        return new docx.TextRun({ text: node.textContent });
+                    }
+                })
+            });
+            doc.addSection({ children: [paragraph] });
+        });
+
+        const blob = await docx.Packer.toBlob(doc);
+        saveAs(blob, "traduzido.docx");
+
+        outputDiv.innerHTML = "Pronto! Arquivo DOCX traduzido baixado.";
 
     } catch (err) {
         console.error(err);
@@ -38,7 +65,7 @@ async function callLLM(apiKey, originalHTML) {
     const rules = `
 INSTRUÇÕES PARA TRADUÇÃO LITERÁRIA:
 
-1 — Traduzir textos do inglês fielmente para o português brasileiro fluidamente, com melhor entendimento. Pode alterar palavras ou frases para dar mais sentido ao texto, mas sem alterar o sentido ORIGINAL. Converter unidades para o formato brasileiro.
+1 — Traduzir textos do inglês fielmente para o português brasileiro fluidamente, com melhor entendimento. Pode alterar palavras ou frases para dar mais sentido, mas sem alterar o sentido ORIGINAL. Converter unidades para o formato brasileiro.
 2 — Manter palavrões e cenas explícitas.
 3 — Em capítulos, colocar os números em extenso (Ex.: Capítulo 1 → Capítulo Um).
 4 — Não deixar palavras em inglês, exceto nomes próprios, cidades, estados, etc.
