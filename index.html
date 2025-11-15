@@ -1,49 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Tradutor DOCX Literário</title>
-
-    <!-- Bibliotecas via CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.3/docx.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 700px;
-            margin: auto;
-            padding: 20px;
-        }
-        input, button {
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px;
-        }
-        #output {
-            white-space: pre-wrap;
-            background: #f0f0f0;
-            padding: 10px;
-            margin-top: 20px;
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <title>DocX Rule Translator – GitHub Pages</title>
 </head>
 <body>
+    <h2>DocX Rule Translator (100% GitHub Pages)</h2>
 
-<h2>Tradutor DOCX Literário (GPT-5 Mini)</h2>
+    <p><b>Sua OpenAI API Key:</b></p>
+    <input type="password" id="apiKey" placeholder="sk-xxxxx" style="width: 300px;" />
 
-<label>Chave da API da OpenAI:</label>
-<input id="apiKey" type="password" placeholder="Cole sua chave aqui">
+    <hr>
 
-<label>Arquivo DOCX:</label>
-<input type="file" id="docxInput">
+    <p>Selecione o arquivo .docx:</p>
+    <input type="file" id="fileInput" />
 
-<button onclick="processDocx()">Traduzir Documento</button>
+    <p>Regras JSON:</p>
+    <textarea id="rules" rows="10" cols="60">
+{
+  "substituicoes_pre": {
+    "procedimento": "procedure"
+  },
+  "substituicoes_pos": {
+    "the Vale": "Vale"
+  },
+  "tom": "professional"
+}
+    </textarea>
 
-<h3>Resultado</h3>
-<div id="output">O texto traduzido aparecerá aqui…</div>
+    <br><br>
+    <button onclick="start()">Traduzir</button>
 
-<script src="script.js"></script>
+    <p id="status"></p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
+    <script src="docx.js"></script>
+    <script src="docx-builder.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
